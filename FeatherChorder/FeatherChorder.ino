@@ -21,6 +21,7 @@
 #include "BluefruitConfig.h"
 #include "KeyCodes.h"
 #include "ChordMappings.h"
+#include "Pins.h"
 
 /*========================================================================
     APPLICATION SETTINGS
@@ -76,7 +77,13 @@ Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_
 // A small helper
 void error(const __FlashStringHelper*err) {
   Serial.println(err);
-  while (1);
+  int last = millis();
+  while (1) {
+    if (millis() - last > 2000) {
+      last = millis();
+      Serial.println(err);
+    }
+  }
 }
 
 // moved to KeyCodes.h
@@ -104,13 +111,13 @@ const int EnPin =  5;
 
 // Pin numbers for the keyboard switches, using the Arduino numbering.
 static const Button switch_pins[7] = {
-  Button(6),  // Pinky
-  Button(A5),  // Ring
-  Button(A4),  // Middle
-  Button(A3),  // Index
-  Button(A2),  // Near Thumb
-  Button(A1),  // Center Thumb
-  Button(A0),  // Far Thumb
+  Button(PINKY),
+  Button(RING),
+  Button(MIDDLE),
+  Button(INDEX),
+  Button(NEAR_THUMB),
+  Button(CENTER_THUMB),
+  Button(FAR_THUMB)
 };
 
 void setup(void)

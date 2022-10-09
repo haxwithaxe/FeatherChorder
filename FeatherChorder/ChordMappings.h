@@ -121,7 +121,7 @@ const keymap_t keymap_default[128] = {
   ENUMKEY__,                        // F-N IMR-  0x5E
   ENUMKEY__,                        // F-N IMRP  0x5F
 
-  MOD_RSHIFT,                       // FC- ----  0x60
+  MODE_RESET,                       // FC- ----  0x60
   ENUMKEY_KPenter,                  // FC- ---P  0x61
   ENUMKEY_KP6,                      // FC- --R-  0x62
   MEDIA_volup, // was ENUMKEY_KP2,  //  FC- --RP  0x63
@@ -270,7 +270,7 @@ const keymap_t keymap_numsym[128] = {
   ENUMKEY__,                        // F-N IMR-  0x5E
   ENUMKEY__,                        // F-N IMRP  0x5F
 
-  MOD_RSHIFT,                       // FC- ----  0x60
+  MODE_RESET,                       // FC- ----  0x60
   ENUMKEY_KPenter,                  // FC- ---P  0x61
   ENUMKEY_KP6,                      // FC- --R-  0x62
   ENUMKEY_KP2,                      // FC- --RP  0x63
@@ -288,7 +288,7 @@ const keymap_t keymap_numsym[128] = {
   ENUMKEY_KP9,                      // FC- IMR-  0x6E
   ENUMKEY_KP0,                      // FC- IMRP  0x6F
 
-  MODE_RESET,                      // FCN ----  0x70
+  MODE_RESET,                       // FCN ----  0x70
   ENUMKEY__,                        // FCN ---P  0x71
   ENUMKEY__,                        // FCN --R-  0x72
   ENUMKEY__,                        // FCN --RP  0x73
@@ -419,7 +419,7 @@ const keymap_t keymap_function[128] = {
   ENUMKEY__,                        // F-N IMR-  0x5E
   ENUMKEY__,                        // F-N IMRP  0x5F
 
-  MOD_RSHIFT,                       // FC- ----  0x60
+  MODE_RESET,                       // FC- ----  0x60
   ENUMKEY__,                        // FC- ---P  0x61
   ENUMKEY__,                        // FC- --R-  0x62
   ENUMKEY__,                        // FC- --RP  0x63

@@ -1,3 +1,5 @@
+
+
 /*
  * Arduino code for a Bluetooth version of the Chorder.
  * @author: clc@clcworld.net
@@ -9,6 +11,8 @@
  */
 
 #include <Arduino.h>
+#include <HID-Settings.h>
+#include <HID-Project.h>
 #include <SPI.h>
 #if not defined (_VARIANT_ARDUINO_DUE_X_)
 #include <SoftwareSerial.h>
@@ -180,6 +184,8 @@ void setup(void)
   String stringOne =  String(0x45, HEX);
   
   Serial.println(stringOne);
+
+  Keyboard.begin();
 }
 
 
@@ -200,12 +206,16 @@ enum Mode {
 bool isCapsLocked = false;
 bool isNumsymLocked = false;
 keymap_t modKeys = 0x00;
+uint8_t usbModKeys = 0x00;
+
 
 Mode mode = ALPHA;
+
 
 void send(char* character) {
 //  Uart.print(character);
 }
+
 
 void sendKey(byte keyState){
   keymap_t theKey;  
@@ -238,28 +248,35 @@ void sendKey(byte keyState){
   case MODE_RESET:
     mode = ALPHA;
     modKeys = 0x00;
+    Keyboard.release(KEY_LEFT_CTRL);
     isCapsLocked = false;
+    Keyboard.release(KEY_LEFT_SHIFT);
     isNumsymLocked = false;
+    Keyboard.release(KEY_LEFT_ALT);
+    Keyboard.release(KEY_LEFT_GUI);
     return;
   case MODE_MRESET:
     mode = ALPHA;
     modKeys = 0x00;
     isCapsLocked = false;
-    isNumsymLocked = false;       
+    isNumsymLocked = false;
     digitalWrite(EnPin, LOW);  // turn off 3.3v regulator enable.
+    Keyboard.releaseAll();
     return;
   // Handle mode locks
   case ENUMKEY_cpslck:
-    if (isCapsLocked){
+    if (isCapsLocked) {
       isCapsLocked = false;
       modKeys = 0x00;
+      Keyboard.release(KEY_LEFT_SHIFT);
     } else {
       isCapsLocked = true;
       modKeys = 0x02;
+      Keyboard.press(KEY_LEFT_SHIFT);
     }
     return;
   case MODE_NUMLCK:
-    if (isNumsymLocked){
+    if (isNumsymLocked) {
       isNumsymLocked = false;
       mode = ALPHA;
     } else {
@@ -270,27 +287,35 @@ void sendKey(byte keyState){
   // Handle modifier keys toggling
   case MOD_LCTRL:
     modKeys = modKeys ^ 0x01;
+    Keyboard.press(KEY_LEFT_CTRL);
     return;
   case MOD_LSHIFT:
     modKeys = modKeys ^ 0x02;
+    Keyboard.press(KEY_LEFT_SHIFT);
     return;
   case MOD_LALT:
     modKeys = modKeys ^ 0x04;
+    Keyboard.press(KEY_LEFT_ALT);
     return;
   case MOD_LGUI:
     modKeys = modKeys ^ 0x08;
+    Keyboard.press(KEY_LEFT_GUI);
     return;
   case MOD_RCTRL:
     modKeys = modKeys ^ 0x10;
+    Keyboard.press(KEY_RIGHT_CTRL);
     return;
   case MOD_RSHIFT:
     modKeys = modKeys ^ 0x20;
+    Keyboard.press(KEY_RIGHT_SHIFT);
     return;
   case MOD_RALT:
     modKeys = modKeys ^ 0x40;
+    Keyboard.press(KEY_RIGHT_ALT);
     return;
   case MOD_RGUI:
     modKeys = modKeys ^ 0x80;
+    Keyboard.press(KEY_RIGHT_GUI);
     return;
   // Handle special keys
   case MULTI_NumShift:
@@ -300,10 +325,13 @@ void sendKey(byte keyState){
       mode = NUMSYM;
     }
     modKeys = modKeys ^ 0x02;
+    Keyboard.press(KEY_LEFT_SHIFT);
     return;
   case MULTI_CtlAlt:
     modKeys = modKeys ^ 0x01;
+    Keyboard.press(KEY_LEFT_CTRL);
     modKeys = modKeys ^ 0x04;
+    Keyboard.press(KEY_LEFT_ALT);
     return;
   /* Everything after this sends actual keys to the system; break rather than
      return since we want to reset the modifiers after these keys are sent. */
@@ -311,98 +339,149 @@ void sendKey(byte keyState){
     sendRawKey(0x00, 0x27);
     sendRawKey(0x00, 0x27);
     sendRawKey(0x00, 0x27);
+    Keyboard.print("000");
     break;
   case MACRO_00:
     sendRawKey(0x00, 0x27);
     sendRawKey(0x00, 0x27);
+    Keyboard.print("00");
     break;
   case MACRO_quotes:
     sendRawKey(0x02, 0x34);
     sendRawKey(0x02, 0x34);
     sendRawKey(0x00, 0x50);
+    Keyboard.print("\"\"");
+    Keyboard.write(KEY_LEFT_ARROW);
     break;
   case MACRO_parens:
     sendRawKey(0x02, 0x26);
     sendRawKey(0x02, 0x27);
     sendRawKey(0x00, 0x50);
+    Keyboard.print("()");
+    Keyboard.write(KEY_LEFT_ARROW);
     break;
   case MACRO_dollar:
     sendRawKey(0x02, 0x21);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write('1');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   case MACRO_percent:
     sendRawKey(0x02, 0x22);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write('5');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   case MACRO_ampersand:
     sendRawKey(0x02, 0x24);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write('7');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   case MACRO_asterisk:
     sendRawKey(0x02, 0x25);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write('8');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   case MACRO_question:
     sendRawKey(0x02, 0x38);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write('/');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   case MACRO_plus:
     sendRawKey(0x02, 0x2E);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write('=');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   case MACRO_openparen:
     sendRawKey(0x02, 0x26);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write('9');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   case MACRO_closeparen:
     sendRawKey(0x02, 0x27);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write('0');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   case MACRO_opencurly:
     sendRawKey(0x02, 0x2F);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write('[');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   case MACRO_closecurly:
     sendRawKey(0x02, 0x30);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.write(']');
+    Keyboard.release(KEY_LEFT_SHIFT);
     break;
   // Handle Android specific keys
   case ANDROID_search:
     sendRawKey(0x04, 0x2C);
+    Keyboard.write(KeyboardKeycode(0x7e));
     break;
   case ANDROID_home:
     sendRawKey(0x04, 0x29);
+    Keyboard.write(KeyboardKeycode(KEY_HOME));
     break;
   case ANDROID_menu:
     sendRawKey(0x10, 0x29);
+    Keyboard.write(KeyboardKeycode(0x76));
     break;
   case ANDROID_back:
     sendRawKey(0x00, 0x29);
+    Keyboard.write(KeyboardKeycode(0x7a));
     break;
   case ANDROID_dpadcenter:
     sendRawKey(0x00, 0x5D);
+    Keyboard.write(KeyboardKeycode(0x77));
     break;
   case MEDIA_playpause:
     sendControlKey("PLAYPAUSE");
+    Keyboard.write(KeyboardKeycode(0xe8));
     break;
   case MEDIA_stop:
     sendControlKey("MEDIASTOP");
+    Keyboard.write(KeyboardKeycode(0xf3));
     break;
   case MEDIA_next:
     sendControlKey("MEDIANEXT");
+    Keyboard.write(KeyboardKeycode(0xeb));
     break;
   case MEDIA_previous:
     sendControlKey("MEDIAPREVIOUS");
+    Keyboard.write(KeyboardKeycode(0xea));
     break;
   case MEDIA_volup:
     sendControlKey("VOLUME+,500");
+    Keyboard.write(HID_KEYBOARD_VOLUME_DOWN);
     break;
   case MEDIA_voldn:
     sendControlKey("VOLUME-,500");
+    Keyboard.write(HID_KEYBOARD_VOLUME_UP);
     break;
   // Send the key
   default:
+    Serial.println(String(theKey, HEX));
     sendRawKey(modKeys, theKey);
+    Keyboard.write(KeyboardKeycode(theKey));
     break;
   }
 
   modKeys = 0x00;
+  Keyboard.releaseAll();
   mode = ALPHA;
   // Reset the modKeys and mode based on locks
-  if (isCapsLocked){
+  if (isCapsLocked) {
     modKeys = 0x02;
+    Keyboard.press(KEY_LEFT_SHIFT);
   }
-  if (isNumsymLocked){
+  if (isNumsymLocked) {
     mode = NUMSYM;
   }
 }
@@ -472,4 +551,3 @@ void loop() {
 
   lastKeyState = keyState;
 }
-
